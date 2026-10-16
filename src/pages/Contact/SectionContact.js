@@ -1,14 +1,12 @@
-import React from 'react'
-import ContactForm from './ContactForm'
-import Sponsors from '../../components/common/Sponsors'
+import React from 'react';
+import Sponsors from '../../components/common/Sponsors';
+import ContactForm from './ContactForm';
 
-const SectionContact = () => {
-  return (
-    <>
-    <ContactForm/>
-    <Sponsors/>
-    </>
-  )
-}
+const SectionContact = () => (
+  <>
+    <ContactForm />
+    <Sponsors />
+  </>
+);
 
-export default SectionContact
+export default SectionContact;

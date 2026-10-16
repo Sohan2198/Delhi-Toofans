@@ -1,272 +1,195 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { ChevronLeft, ChevronRight, Maximize2 } from 'lucide-react';
+import Modal from '../../components/ui/Modal';
+import { playersByGroup } from '../../data/players';
 
-// Player cards (595x842)
-import George from './Team/With BG/George Antony_Attacker.png';
-import Deepak from './Team/With BG/Deepak Kumar_Universal.png';
-import Amadou from './Team/With BG/Amadou Laye Samb_Attacker.png';
-import Pravin from './Team/With BG/Pravin P_Blocker.png';
-import Muhammed from './Team/With BG/Muhammed Jasim_Blocker.png';
-import James from './Team/With BG/James Weir_Blocker.png';
-import Anand from './Team/With BG/Anand K_Libero.png';
-import Aljo from './Team/With BG/Aljo sabu_Libero.png';
-import LalSujan from './Team/With BG/Lal Sujan_Setter.png';
-import Shamil from './Team/With BG/Muhammed Shamil_Setter.png';
-import Abhishek from './Team/With BG/Abhishek Rajeev_Universal.png';
-import Yoan from './Team/With BG/Yoan David_Universal.png';
-import Sheik from './Team/With BG/Shiek Numan_Attacker.png';
-import Sachin from './Team/With BG/Sachin Kundathil_Blocker.png';
+// Profiles step through players in the same order the page shows them.
+const orderedPlayers = playersByGroup.flatMap(({ players }) => players);
 
-// Info cards (1920x822)
-import GeorgeHover from './Team/Info/George Antony_Attacker.webp';
-import DeepakHover from './Team/Info/Deepak Kumar_Universal.webp';
-import AmadouHover from './Team/Info/Amadou Laye Samb_Attacker.webp';
-import PravinHover from './Team/Info/Pravin P_Blocker.webp';
-import MuhammedHover from './Team/Info/Muhammed Jasim_Blocker.webp';
-import JamesHover from './Team/Info/James Weir_Blocker.webp';
-import AnandHover from './Team/Info/Anand K_Libero.webp';
-import AljoHover from './Team/Info/Aljo Sabu_Libero.webp';
-import LalSujanHover from './Team/Info/Lal Sujan_Setter.webp';
-import ShamilHover from './Team/Info/Muhammed Shamil_Setter.webp';
-import AbhishekHover from './Team/Info/Abhishek Rajeev_Universal.webp';
-import YoanHover from './Team/Info/Yoan David_Universal.webp';
-import SheikHover from './Team/Info/Shiek Numan_Attacker.webp';
-import SachinHover from './Team/Info/Sachin Kundathil_Blocker.webp';
+const groupId = (group) => `squad-${group.toLowerCase().replace(/\s+/g, '-')}`;
 
-const GridItem = ({ image, name, position, hoverImage, onHover }) => {
-  return (
-    <div className="relative flex flex-col items-center md:w-1/5 w-full mb-2 gap-4 mx-1">
+const STATS = [
+  { key: 'height', label: 'Height' },
+  { key: 'spikeHeight', label: 'Spike' },
+  { key: 'blockHeight', label: 'Block' },
+];
+
+const PlayerCard = ({ player, onOpen }) => (
+  <li>
+    <button
+      type="button"
+      onClick={() => onOpen(player.id)}
+      className="group relative block w-full overflow-hidden rounded-2xl bg-toofan-purple text-left shadow-md transition duration-300 hover:-translate-y-1 hover:shadow-2xl focus:outline-none focus-visible:ring-4 focus-visible:ring-toofan-yellow"
+      aria-label={`View ${player.name} profile`}
+    >
       <img
-        src={image}
-        alt={name}
-        className="z-10"
-        onMouseEnter={() => onHover({ name, position, hoverImage })}
-        onMouseLeave={() => onHover(null)}
+        src={player.images.card}
+        alt=""
+        className="aspect-[595/842] w-full object-cover transition duration-500 group-hover:scale-105"
+        loading="lazy"
       />
-      <span className="font-bold text-xl py-1 z-30">{name}</span>
-      <span className="font-semibold z-30">{position}</span>
-    </div>
-  );
-};
 
-const ModalBox = ({ player, isVisible, onClose }) => {
-  if (!isVisible || !player) return null;
+      {/* Name plate over a bottom gradient */}
+      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-toofan-purple via-toofan-purple/85 to-transparent px-4 pb-4 pt-16">
+        <span className="block text-lg font-extrabold leading-tight text-white sm:text-xl">{player.name}</span>
+        <span className="mt-1 block text-sm font-semibold text-toofan-yellow">{player.position}</span>
+        <span className="mt-3 hidden gap-3 text-xs text-white/80 sm:flex">
+          {STATS.map(({ key, label }) => (
+            <span key={key}>
+              <span className="font-bold tabular-nums text-white">{player.stats[key]}</span> {label}
+            </span>
+          ))}
+        </span>
+      </div>
 
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-      <div className="bg-white py-5 px-4 rounded-lg relative mx-auto">
-        <button
-          className="absolute top-0 right-1 text-2xl font-bold cursor-pointer"
-          onClick={onClose}
-          aria-label="Close player details"
-        >
-          &times;
-        </button>
+      <span
+        className="absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-full bg-toofan-yellow text-toofan-purple opacity-0 shadow transition group-hover:opacity-100 group-focus-visible:opacity-100"
+        aria-hidden="true"
+      >
+        <Maximize2 size={16} />
+      </span>
+    </button>
+  </li>
+);
 
-        <img
-          src={player.hoverImage}
-          alt={player.name}
-          className="w-auto md:h-96 h-auto mb-4"
-        />
-        <h2 className="text-center font-bold text-xl mb-2">
+const PlayerProfile = ({ player, index, total, onStep }) => (
+  <div className="bg-toofan-purple text-white">
+    <img src={player.images.info} alt={`${player.name} profile card`} className="h-auto w-full" />
+    <div className="flex flex-wrap items-center justify-between gap-4 px-5 py-4">
+      <div>
+        <h2 id="player-modal-title" className="text-xl font-extrabold md:text-2xl">
           {player.name}
         </h2>
-        <p className="text-center font-semibold">{player.position}</p>
+        <p className="text-sm font-semibold text-toofan-yellow">{player.position}</p>
+      </div>
+      <div className="flex items-center gap-3">
+        <span className="text-sm font-semibold tabular-nums text-white/70">
+          <span className="text-toofan-yellow">{String(index + 1).padStart(2, '0')}</span> /{' '}
+          {String(total).padStart(2, '0')}
+        </span>
+        {[
+          { direction: -1, label: 'Previous player', Icon: ChevronLeft },
+          { direction: 1, label: 'Next player', Icon: ChevronRight },
+        ].map(({ direction, label, Icon }) => (
+          <button
+            key={label}
+            type="button"
+            onClick={() => onStep(direction)}
+            aria-label={label}
+            className="grid h-10 w-10 place-items-center rounded-full border border-white/30 transition hover:border-toofan-yellow hover:bg-toofan-yellow hover:text-toofan-purple focus:outline-none focus-visible:ring-2 focus-visible:ring-toofan-yellow"
+          >
+            <Icon size={20} />
+          </button>
+        ))}
       </div>
     </div>
-  );
-};
+  </div>
+);
 
 const SectionToofaniSquad = () => {
-  const [hoveredPlayer, setHoveredPlayer] = useState(null);
-  const [isModalVisible, setModalVisible] = useState(false);
+  const [activeId, setActiveId] = useState(null);
+  const activeIndex = orderedPlayers.findIndex((player) => player.id === activeId);
+  const activePlayer = orderedPlayers[activeIndex];
 
-  const enterTimeout = useRef(null);
-  const leaveTimeout = useRef(null);
+  const closeModal = useCallback(() => setActiveId(null), []);
+  const step = useCallback(
+    (direction) =>
+      setActiveId((currentId) => {
+        const current = orderedPlayers.findIndex((player) => player.id === currentId);
+        return orderedPlayers[(current + direction + orderedPlayers.length) % orderedPlayers.length].id;
+      }),
+    []
+  );
 
+  // Arrow keys move between profiles while the modal is open.
   useEffect(() => {
-    return () => {
-      clearTimeout(enterTimeout.current);
-      clearTimeout(leaveTimeout.current);
+    if (!activeId) return undefined;
+    const handleKeyDown = (event) => {
+      if (event.key === 'ArrowLeft') step(-1);
+      if (event.key === 'ArrowRight') step(1);
     };
-  }, []);
-
-  const handleHover = (player) => {
-    clearTimeout(leaveTimeout.current);
-    clearTimeout(enterTimeout.current);
-
-    if (player) {
-      enterTimeout.current = setTimeout(() => {
-        setHoveredPlayer(player);
-        setModalVisible(true);
-      }, 500);
-    } else {
-      leaveTimeout.current = setTimeout(() => {
-        setModalVisible(false);
-      }, 20000);
-    }
-  };
-
-  // OUTSIDE HITTERS - 4 players
-  const outsideHitters = [
-    {
-      image: George,
-      name: 'George Antony',
-      position: 'Outside Hitter',
-      dob: '10/11/1999',
-      hoverImage: GeorgeHover
-    },
-    {
-      image: Deepak,
-      name: 'Deepak Kumar M',
-      position: 'Outside Hitter',
-      dob: '11/14/2002',
-      hoverImage: DeepakHover
-    },
-    {
-      image: Amadou,
-      name: 'Amadou Laye Samb',
-      position: 'Outside Hitter',
-      dob: '2/19/1997',
-      hoverImage: AmadouHover
-    },
-    {
-      image: Sheik,
-      name: 'Shiek Numan',
-      position: 'Outside Hitter',
-      dob: '6/21/2006',
-      hoverImage: SheikHover
-    }
-  ];
-
-  // MIDDLE BLOCKERS - 4 players
-  const middleBlockers = [
-    {
-      image: Pravin,
-      name: 'Pravin P',
-      position: 'Middle Blocker',
-      dob: '1/26/2006',
-      hoverImage: PravinHover
-    },
-    {
-      image: Muhammed,
-      name: 'Muhammed Jasim',
-      position: 'Middle Blocker',
-      dob: '7/18/2003',
-      hoverImage: MuhammedHover
-    },
-    {
-      image: James,
-      name: 'James Weir',
-      position: 'Middle Blocker',
-      dob: '7/20/1995',
-      hoverImage: JamesHover
-    },
-    {
-      image: Sachin,
-      name: 'Sachin K',
-      position: 'Blocker',
-      dob: '1/20/1996',
-      hoverImage: SachinHover
-    }
-  ];
-
-  // LIBEROS - 2 players
-  const liberos = [
-    {
-      image: Anand,
-      name: 'Anand K',
-      position: 'Libero',
-      dob: '9/11/2002',
-      hoverImage: AnandHover
-    },
-    {
-      image: Aljo,
-      name: 'Aljo Sabu',
-      position: 'Libero',
-      dob: '9/15/2004',
-      hoverImage: AljoHover
-    }
-  ];
-
-  // SETTERS - 2 players
-  const setters = [
-    {
-      image: LalSujan,
-      name: 'Lal Sujan M V',
-      position: 'Setter',
-      dob: '5/30/1992',
-      hoverImage: LalSujanHover
-    },
-    {
-      image: Shamil,
-      name: 'Muhammed Shamil O K',
-      position: 'Setter',
-      dob: '2/18/2002',
-      hoverImage: ShamilHover
-    }
-  ];
-
-  // OPPOSITES - 2 players
-  const opposites = [
-    {
-      image: Abhishek,
-      name: 'Abhishek Rajeev',
-      position: 'Opposite',
-      dob: '3/18/1996',
-      hoverImage: AbhishekHover
-    },
-    {
-      image: Yoan,
-      name: 'Yoan David',
-      position: 'Opposite',
-      dob: '7/5/1999',
-      hoverImage: YoanHover
-    }
-  ];
-
-  const squad = [
-    { title: 'Outside Hitter', players: outsideHitters },
-    { title: 'Middle Blocker', players: middleBlockers },
-    { title: 'Libero', players: liberos },
-    { title: 'Setter', players: setters },
-    { title: 'Opposite', players: opposites }
-  ];
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [activeId, step]);
 
   return (
-    <section className="mb-6">
-      <h1 className="py-4 bg-[#ffbd00] text-center text-4xl font-bold">
-        Toofani Squad
-      </h1>
+    <>
+      {/* Page header */}
+      <header className="relative overflow-hidden bg-toofan-purple text-white">
+        <div
+          className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-toofan-yellow/10 blur-2xl"
+          aria-hidden="true"
+        />
+        <div className="relative mx-auto max-w-7xl px-5 py-12 sm:px-8 md:py-16">
+          <p className="flex items-center gap-3 text-sm font-bold uppercase tracking-[0.2em] text-white/70">
+            <span className="h-1 w-8 rounded-full bg-toofan-yellow" aria-hidden="true" />
+            Delhi Toofans
+          </p>
+          <h1 className="mt-2 text-4xl font-extrabold md:text-6xl">
+            Toofani <span className="text-toofan-yellow">Squad</span>
+          </h1>
+          <p className="mt-3 max-w-xl text-white/80">
+            {orderedPlayers.length} players across {playersByGroup.length} positions. Select a player to view their full
+            profile.
+          </p>
+        </div>
+      </header>
 
-      <div className="max-auto md:px-[8rem]">
-        {squad.map(({ title, players }) => (
-          <React.Fragment key={title}>
-            <h2 className="text-center md:text-4xl py-5 font-semibold text-[#3b0067] text-2xl">
-              {title}
-            </h2>
-            <div className="flex flex-wrap justify-center gap-5">
-              {players.map((player) => (
-                <GridItem
-                  key={player.name}
-                  {...player}
-                  onHover={handleHover}
-                />
-              ))}
+      {/* Position jump links */}
+      <nav
+        aria-label="Positions"
+        className="sticky top-0 z-20 border-b border-gray-200 bg-white/95 shadow-sm backdrop-blur"
+      >
+        <ul className="mx-auto flex max-w-7xl gap-2 overflow-x-auto px-5 py-3 sm:px-8">
+          {playersByGroup.map(({ group, players: groupPlayers }) => (
+            <li key={group} className="shrink-0">
+              <a
+                href={`#${groupId(group)}`}
+                className="flex items-center gap-2 rounded-full bg-toofan-purple/5 px-4 py-1.5 text-sm font-semibold text-toofan-purple transition hover:bg-toofan-purple hover:text-white"
+              >
+                {group}
+                <span className="rounded-full bg-toofan-yellow px-2 text-xs font-bold text-toofan-purple">
+                  {groupPlayers.length}
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      {/* Groups */}
+      <div className="mx-auto max-w-7xl px-5 pb-16 sm:px-8">
+        {playersByGroup.map(({ group, players: groupPlayers }) => (
+          <section
+            key={group}
+            id={groupId(group)}
+            className="scroll-mt-20 pt-12"
+            aria-labelledby={`${groupId(group)}-title`}
+          >
+            <div className="mb-6 flex items-center gap-4">
+              <h2 id={`${groupId(group)}-title`} className="text-2xl font-extrabold text-toofan-purple md:text-3xl">
+                {group}
+              </h2>
+              <span className="h-px flex-1 bg-gradient-to-r from-toofan-yellow to-transparent" aria-hidden="true" />
+              <span className="text-sm font-semibold text-gray-500">
+                {groupPlayers.length} {groupPlayers.length === 1 ? 'player' : 'players'}
+              </span>
             </div>
-          </React.Fragment>
+            <ul className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
+              {groupPlayers.map((player) => (
+                <PlayerCard key={player.id} player={player} onOpen={setActiveId} />
+              ))}
+            </ul>
+          </section>
         ))}
       </div>
 
-      <ModalBox
-        player={hoveredPlayer}
-        isVisible={isModalVisible}
-        onClose={() => {
-          clearTimeout(enterTimeout.current);
-          clearTimeout(leaveTimeout.current);
-          setModalVisible(false);
-        }}
-      />
-    </section>
+      <Modal isOpen={Boolean(activePlayer)} onClose={closeModal} labelledBy="player-modal-title" className="max-w-5xl">
+        {activePlayer && (
+          <PlayerProfile player={activePlayer} index={activeIndex} total={orderedPlayers.length} onStep={step} />
+        )}
+      </Modal>
+    </>
   );
 };
 

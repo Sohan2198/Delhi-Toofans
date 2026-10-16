@@ -1,54 +1,48 @@
-import React from 'react';
-
-import { BrowserRouter, Route, Routes, } from 'react-router-dom';
-import './App.css';
-import Header from './components/layout/Header';
-import { Suspense } from 'react';
-import Home from './pages/Home';
-import AboutUs from './pages/AboutUs/AboutUs';
+import React, { lazy, Suspense } from 'react';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Footer from './components/layout/Footer';
-import SectionContact from './pages/Contact/SectionContact';
-import SectionFixtureResult from './pages/FixtureResult/SectionFixtureResult';
-import SectionSponsors from './pages/Sponsors/SectionSponsors';
-// import SectionNewsUpdates from './pages/NewUpdate/SectionNewsUpdates';
-import SectionToofaniSquad from './pages/Squad/SectionToofaniSquad';
-import SectionNewsLetter from './pages/Newsletter/SectionNewsLetter';
-import MainSection from './pages/Gallery/MainSection';
-import NewsUpdated from './pages/NewUpdate/NewsUpdated';
-import Calendar from './pages/Schedule/Calendar';
-// import Add from  './pages/Schedule/Ad';
+import Header from './components/layout/Header';
+import ScrollToTop from './components/layout/ScrollToTop';
+import Home from './pages/Home';
 
-function App() {
-  return (
-    <div className="App">
-      <BrowserRouter>
-        <Header />
+// Inner pages are code-split so the home page ships only what it renders.
+const AboutUs = lazy(() => import('./pages/AboutUs/AboutUs'));
+const SquadPage = lazy(() => import('./pages/Squad/SectionToofaniSquad'));
+const FixturesPage = lazy(() => import('./pages/FixtureResult/SectionFixtureResult'));
+const GalleryPage = lazy(() => import('./pages/Gallery/MainSection'));
+const SponsorsPage = lazy(() => import('./pages/Sponsors/SectionSponsors'));
+const ContactPage = lazy(() => import('./pages/Contact/SectionContact'));
+const CalendarPage = lazy(() => import('./pages/Schedule/Calendar'));
+const NotFound = lazy(() => import('./pages/NotFound'));
+
+const PageLoader = () => (
+  <div className="flex min-h-[50vh] items-center justify-center" role="status" aria-live="polite">
+    <span className="h-10 w-10 animate-spin rounded-full border-4 border-toofan-purple border-t-toofan-yellow" />
+    <span className="sr-only">Loading…</span>
+  </div>
+);
+
+const App = () => (
+  <BrowserRouter>
+    <ScrollToTop />
+    <Header />
+    <main>
+      <Suspense fallback={<PageLoader />}>
         <Routes>
-          {/* <Route index element={<Home />} /> */}
-          <Route path='/' element={
-            <Suspense fallback={<div>Components are loading please wait....</div>}
-            >
-              <Home />
-            </Suspense>
-          }
-          />
-          <Route path="/About" Component={AboutUs} />
-          {/* <Route path='/News-Updates' Component={SectionNewsUpdates}/> */}
-          <Route path='/News-Updates' Component={NewsUpdated} />
-          <Route path='/Squad' Component={SectionToofaniSquad} />
-          <Route path="/Fixtures&Results" Component={SectionFixtureResult} />
-          <Route path='/Gallery' Component={MainSection} />
-          <Route path='/Newsletter' Component={SectionNewsLetter} />
-          <Route path='/Sponsors' Component={SectionSponsors} />
-          <Route path="/Contact" Component={SectionContact} />
-          <Route path="/Calendar" Component={Calendar} />
-          {/* <Route path="/Add" Component={Add} /> */}
-
+          <Route path="/" element={<Home />} />
+          <Route path="/About" element={<AboutUs />} />
+          <Route path="/Squad" element={<SquadPage />} />
+          <Route path="/Fixtures&Results" element={<FixturesPage />} />
+          <Route path="/Gallery" element={<GalleryPage />} />
+          <Route path="/Sponsors" element={<SponsorsPage />} />
+          <Route path="/Contact" element={<ContactPage />} />
+          <Route path="/Calendar" element={<CalendarPage />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
-        <Footer />
-      </BrowserRouter>
-    </div>
-  );
-}
+      </Suspense>
+    </main>
+    <Footer />
+  </BrowserRouter>
+);
 
 export default App;

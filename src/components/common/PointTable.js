@@ -1,121 +1,99 @@
 import React from 'react';
-// Team Logo 
-import Team_First from '../../pages/FixtureResult/Image/Teams/Hyderabad.webp';
-import Team_Second from '../../pages/FixtureResult/Image/Teams/Delhi.webp';
-import Team_Third from '../../pages/FixtureResult/Image/Teams/Delhi.webp';
-import Team_Fourth from '../../pages/FixtureResult/Image/Teams/Calicut.webp';
+import { fixtures } from '../../data/fixtures';
+import { standings } from '../../data/standings';
+import { HOME_TEAM, TEAM_LOGOS } from '../../data/teams';
 
-import teamA from '../../pages/FixtureResult/Image/Teams/Delhi.webp';
-import teamB from '../../pages/FixtureResult/Image/Teams/Ahmedabad.webp';
-import teamC from '../../pages/FixtureResult/Image/Teams/Goa.webp';
-import teamD from '../../pages/FixtureResult/Image/Teams/Bengaluru.webp';
-import teamE from '../../pages/FixtureResult/Image/Teams/Mumbai.webp';
+const FEATURED_MATCH_NUMBERS = [14, 17];
+const STANDINGS_PREVIEW_ROWS = 5;
+const homeHighlight = 'rounded-full p-1 ring-2 ring-toofan-purple';
 
-const StandingTable = () => {
-  const teams = [
-    { team: 'Mumbai Meteors', logo: teamE, p: 7, w: 6, l: 1, sd: '12', pts: 17 },
-    { team: 'Bengaluru Torpedoes', logo: teamD, p: 7, w: 5, l: 2, sd: '5', pts: 14 },
-    { team: 'Ahmedabad Defenders', logo: teamB, p: 7, w: 4, l: 3, sd: '2', pts: 12 },
-    { team: 'Goa Guardians', logo: teamC, p: 7, w: 3, l: 4, sd: '0', pts: 10 },
-    { team: 'Delhi Toofans', logo: teamA, p: 7, w: 3, l: 4, sd: '-1', pts: 10 },
-  ];
+const TeamLogo = ({ team, className }) => (
+  <img
+    src={TEAM_LOGOS[team]}
+    alt={`${team} logo`}
+    className={`${className} ${team === HOME_TEAM ? homeHighlight : ''}`}
+    loading="lazy"
+  />
+);
 
+const resultLine = ({ home, away, score }) => {
+  const [homeSets, awaySets] = score.split('-').map(Number);
+  const [winner, loser] = homeSets > awaySets ? [home, away] : [away, home];
+  const winningScore = `${Math.max(homeSets, awaySets)} - ${Math.min(homeSets, awaySets)}`;
+  return { winner, loser, winningScore };
+};
+
+const FeaturedResult = ({ match }) => {
+  const { winner, loser, winningScore } = resultLine(match);
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full bg-white shadow-md rounded-lg">
-        <thead className="bg-[#ffbd00] text-white text-center">
-          <tr>
-            <th className="py-2 px-4 border-b border-gray-200">Team</th>
-            <th className="py-2 px-4 border-b border-gray-200">P</th>
-            <th className="py-2 px-4 border-b border-gray-200">W</th>
-            <th className="py-2 px-4 border-b border-gray-200">L</th>
-            <th className="py-2 px-4 border-b border-gray-200">SD</th>
-            <th className="py-2 px-4 border-b border-gray-200">PTS</th>
-          </tr>
-        </thead>
-        <tbody>
-          {teams.map((team, index) => {
-            const isDelhi = team.team === 'Delhi Toofans';
-            return (
-              <tr
-                key={index}
-                className={`even:bg-gray-50 ${isDelhi ? 'bg-yellow-50 ring-2 ring-[#3b0067] ring-inset' : ''}`}
-              >
-                <td className="py-2 px-4 text-gray-800 flex items-center gap-2 justify-start">
-                  <img
-                    src={team.logo}
-                    className={`w-10 h-10 object-contain ${isDelhi ? 'ring-2 ring-[#3b0067] rounded-full p-1' : ''}`}
-                    alt={`${team.team} logo`}
-                  />
-                  <span className={`font-semibold ${isDelhi ? 'text-[#3b0067]' : ''}`}>{team.team}</span>
-                  {isDelhi && (
-                    <span className="ml-2 text-[10px] px-2 py-0.5 rounded-full bg-[#3b0067]/10 text-[#3b0067] font-bold tracking-wide">
-                      HIGHLIGHT
-                    </span>
-                  )}
-                </td>
-                <td className="py-2 px-4 font-semibold text-center">{team.p}</td>
-                <td className="py-2 px-4 font-semibold text-center">{team.w}</td>
-                <td className="py-2 px-4 font-semibold text-center">{team.l}</td>
-                <td className="py-2 px-4 font-semibold text-center">{team.sd}</td>
-                <td className="py-2 px-4 font-semibold text-center">{team.pts}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+    <div className="mb-4 py-1 text-center">
+      <div className="flex items-center justify-evenly gap-4 py-2">
+        <TeamLogo team={match.home} className="h-auto w-20" />
+        <span className="text-2xl font-bold text-toofan-purple">{match.score.replace('-', ' - ')}</span>
+        <TeamLogo team={match.away} className="h-auto w-20" />
+      </div>
+      <h3 className="rounded-md bg-toofan-purple p-2 text-white">
+        {winner} <span className="font-bold">beat</span> {loser} {winningScore}
+      </h3>
     </div>
   );
 };
 
-// Highlight only Delhi logos in fixtures
-const DelhiLogo = ({ src, alt, isDelhi }) => (
-  <img
-    src={src}
-    alt={alt}
-    className={`w-20 h-auto ${isDelhi ? 'ring-2 ring-[#3b0067] rounded-full p-1' : ''}`}
-  />
+const StandingsPreview = () => (
+  <div className="overflow-x-auto">
+    <table className="min-w-full rounded-lg bg-white shadow-md">
+      <thead className="bg-toofan-yellow text-center text-black">
+        <tr>
+          {['Team', 'P', 'W', 'L', 'SD', 'PTS'].map((heading) => (
+            <th key={heading} scope="col" className="border-b border-gray-200 px-4 py-2">
+              {heading}
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {standings.slice(0, STANDINGS_PREVIEW_ROWS).map((row) => {
+          const isHome = row.team === HOME_TEAM;
+          return (
+            <tr
+              key={row.team}
+              className={`even:bg-gray-50 ${isHome ? 'bg-yellow-50 ring-2 ring-inset ring-toofan-purple' : ''}`}
+            >
+              <td className="flex items-center justify-start gap-2 px-4 py-2 text-gray-800">
+                <TeamLogo team={row.team} className="h-10 w-10 object-contain" />
+                <span className={`font-semibold ${isHome ? 'text-toofan-purple' : ''}`}>{row.team}</span>
+              </td>
+              {[row.gp, row.w, row.l, row.sd, row.pts].map((value, index) => (
+                <td key={index} className="px-4 py-2 text-center font-semibold">
+                  {value}
+                </td>
+              ))}
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  </div>
 );
 
 const PointTable = () => {
+  const featured = fixtures.filter((match) => FEATURED_MATCH_NUMBERS.includes(match.matchNo));
+
   return (
-    <section className="bg-gray-100 py-6 justify-center items-center mx-auto m-2 mt-10 md:px-[9rem]">
-      <main className="md:flex justify-center gap-8 grid">
-        {/* Left Section: Fixture & Results */}
+    <section className="m-2 mx-auto mt-10 items-center justify-center bg-gray-100 py-6 md:px-[9rem]">
+      <div className="grid justify-center gap-8 md:flex">
         <div className="w-full max-w-lg rounded-lg p-4">
-          <h1 className="text-center text-3xl font-bold my-2 mb-6 text-[#3b0067]">Fixtures & Results 2025</h1>
-
-          {/* Fixture 1: Hyderabad vs Delhi (highlight Delhi on RIGHT) */}
-          <div className="text-center py-1 mb-4">
-            <div className="flex justify-evenly items-center gap-4 py-2">
-              <DelhiLogo src={Team_First} alt="Hyderabad Black Hawks" isDelhi={false} />
-              <span className="text-[#3b0067] text-2xl font-bold">0 - 3</span>
-              <DelhiLogo src={Team_Second} alt="Delhi Toofans" isDelhi />
-            </div>
-            <h2 className="bg-[#3b0067] text-white p-2 rounded-md">
-              Delhi Toofans <span className="font-bold">beat</span> Hyderabad Black Hawks 3 - 0
-            </h2>
-          </div>
-
-          {/* Fixture 2: Delhi vs Calicut (highlight Delhi on LEFT) */}
-          <div className="text-center py-1">
-            <div className="flex justify-evenly items-center gap-4 py-2">
-              <DelhiLogo src={Team_Third} alt="Delhi Toofans" isDelhi />
-              <span className="text-[#3b0067] text-2xl font-bold">3 - 0</span>
-              <DelhiLogo src={Team_Fourth} alt="Calicut Heroes" isDelhi={false} />
-            </div>
-            <h2 className="bg-[#3b0067] text-white p-2 rounded-md">
-              Delhi Toofans <span className="font-bold">beat</span> Calicut Heroes 3 - 0
-            </h2>
-          </div>
+          <h2 className="my-2 mb-6 text-center text-3xl font-bold text-toofan-purple">Fixtures & Results 2025</h2>
+          {featured.map((match) => (
+            <FeaturedResult key={match.matchNo} match={match} />
+          ))}
         </div>
 
-        {/* Right Section: Standing Table */}
-        <div className="w-full max-w-lg bg-white shadow-md rounded-lg p-4">
-          <h1 className="text-center text-3xl font-bold my-2 mb-6 text-[#3b0067]">Standings</h1>
-          <StandingTable />
+        <div className="w-full max-w-lg rounded-lg bg-white p-4 shadow-md">
+          <h2 className="my-2 mb-6 text-center text-3xl font-bold text-toofan-purple">Standings</h2>
+          <StandingsPreview />
         </div>
-      </main>
+      </div>
     </section>
   );
 };

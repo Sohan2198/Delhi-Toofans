@@ -1,70 +1,77 @@
-# Getting Started with Create React App
+# Delhi Toofans — Official Website
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Marketing site for **Delhi Toofans**, the Prime Volleyball League (PVL) team owned by Resolute Sports Private Limited.
+Built with React 18, React Router 6, Tailwind CSS 3 and Swiper, bootstrapped with Create React App.
 
-## Available Scripts
+## Getting started
 
-In the project directory, you can run:
+Requires Node.js 18+.
 
-### `npm start`
+```bash
+npm install
+npm start            # dev server on http://localhost:3000
+```
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+| Script                 | What it does                               |
+| ---------------------- | ------------------------------------------ |
+| `npm start`            | Run the dev server with hot reload         |
+| `npm run build`        | Production build into `build/`             |
+| `npm test`             | Jest + Testing Library in watch mode       |
+| `npm run test:ci`      | Run the test suite once (for CI)           |
+| `npm run lint`         | ESLint (CRA `react-app` config)            |
+| `npm run format`       | Format the codebase with Prettier          |
+| `npm run format:check` | Fail if any file is not Prettier-formatted |
+| `npm run deploy`       | Build and publish `build/` to GitHub Pages |
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Project structure
 
-### `npm test`
+```
+src/
+  App.js                 Routes (inner pages are lazy-loaded) + layout shell
+  index.css              Tailwind layers and Swiper overrides
+  data/                  Content lives here — edit these files to update the site
+    players.js           Current squad: names, positions, bios, stats, images
+    fixtures.js          Season fixtures and results
+    standings.js         League table
+    teams.js             Team names → logos, HOME_TEAM
+    gallery.js           Gallery photos by season
+    sponsors.js          Sponsors grouped by tier
+    site.js              Nav links, contact details, social links, calendar links
+  assets/
+    players/<player-id>/ cutout.webp (list thumbnail), card.webp (portrait), info.webp (profile card)
+    Banner/, Logo/       Home hero banners and logo
+  components/
+    layout/              Header, Footer, ScrollToTop
+    common/              Home page sections (HeroSlider, AboutSection, Squad, Gallery, PointTable, Sponsors)
+    ui/                  Reusable building blocks (Modal, PageBanner, YearGallery, AddToCalendar)
+  pages/                 One folder per route (About, Squad, Fixtures & Results, Gallery, Sponsors, Contact, …)
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Common content updates
 
-### `npm run build`
+- **Squad changes** — add `cutout.webp` (≈400px wide), `card.webp` (595×842) and `info.webp` (1920×822) under
+  `src/assets/players/<player-id>/`, then add the player to `src/data/players.js`. Both the home page squad and the
+  Squad page update automatically.
+- **Results / standings** — edit `src/data/fixtures.js` and `src/data/standings.js`. Team names must match a key in
+  `src/data/teams.js`.
+- **Sponsors** — add the logo under `src/pages/Sponsors/Sponsors/` and an entry in `src/data/sponsors.js`.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- **Contact form** — sends through Web3Forms (set `REACT_APP_WEB3FORMS_KEY` in `.env.local`) or a Microsoft 365
+  Power Automate flow (`REACT_APP_CONTACT_FORM_URL`; see
+  [docs/contact-form-microsoft-365.md](docs/contact-form-microsoft-365.md)). See `.env.example`, and rebuild after
+  changing either value.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Image guidelines
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Export photos as **WebP** (quality ~80) and size them for how they are displayed — full-width banners at most 1920px
+wide, gallery photos at most 1600px, thumbnails ~400px. Source files (`.psd`) belong in the design drive, not in this
+repo.
 
-### `npm run eject`
+## Brand tokens
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+Tailwind theme colours are defined in `tailwind.config.js`; use them instead of hex values:
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+| Token           | Hex       |
+| --------------- | --------- |
+| `toofan-purple` | `#3b0067` |
+| `toofan-yellow` | `#ffbd00` |

@@ -1,64 +1,60 @@
 import React from 'react';
-import { FaFacebook, FaXTwitter, FaInstagram, FaYoutube } from 'react-icons/fa6'; 
 import { Link } from 'react-router-dom';
+import { NAV_LINKS, ORGANISATION, SOCIAL_LINKS } from '../../data/site';
 
-const Footer = () => {
-  return (
-    <section className="bg-black text-white py-8 mx-auto md:px-[9rem]">
-      <div className="container md:px-20 px-3">
-        {/* Flex container for the footer */}
-        <div className="flex flex-col md:flex-row justify-between space-y-8 md:space-y-0 md:space-x-8">
-          {/* Column 1 */}
-          <div className="flex-1">
-            <h3 className="text-lg font-bold mb-4">Quick Links</h3>
-            <div className="grid grid-cols-2 gap-y-2"> {/* Change to a grid layout */}
-              <ul className="space-y-2 grid">
-                
-                <Link to={'/About'}>About Us</Link>
-                <Link to={'/Squad'}>Toofani Squad</Link>
-                {/* <Link to={'/News-Updates'}>News & Updates</Link> */}
-                <Link to={'/Fixtures&Results'}>Fixtures & Results</Link>
-                <Link to={'/Gallery'}>Gallery</Link>
-                <Link to={'/Sponsors'}>Sponsors</Link>
-              </ul>
-            </div>
-          </div>
+const Footer = () => (
+  <footer className="mx-auto bg-black py-8 text-white md:px-[9rem]">
+    <div className="container px-3 md:px-20">
+      <div className="flex flex-col justify-between space-y-8 md:flex-row md:space-x-8 md:space-y-0">
+        <div className="flex-1">
+          <h3 className="mb-4 text-lg font-bold">Quick Links</h3>
+          <ul className="grid grid-cols-2 gap-x-6 gap-y-2">
+            {NAV_LINKS.map((link) => (
+              <li key={link.to}>
+                <Link to={link.to} className="hover:text-toofan-yellow">
+                  {link.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
 
-          {/* Column 2 (About Us) */}
-          <div className="flex-1 ">
-            <h3 className="text-lg font-bold mb-4">Address</h3>
-            <p className="text-sm leading-relaxed">
-              <span className='uppercase font-semibold'>Resolute Sports Private Limited</span><br />
-              10th Floor, Kataria Arcade, Off SG Highway,<br/> Post: Makarba, Ahmedabad - 380051, Gujarat, India
-            </p>
-          </div>
+        <div className="flex-1">
+          <h3 className="mb-4 text-lg font-bold">Address</h3>
+          <address className="text-sm not-italic leading-relaxed">
+            <span className="font-semibold uppercase">{ORGANISATION.name}</span>
+            {ORGANISATION.addressLines.map((line) => (
+              <React.Fragment key={line}>
+                <br />
+                {line}
+              </React.Fragment>
+            ))}
+          </address>
+        </div>
 
-          {/* Column 3 (Contact Us and Social Media) */}
-          <div className="flex-1">
-            <h3 className="text-lg font-bold mb-4">Connect with Us</h3>
-            <p className="text-sm leading-relaxed mb-1">
-              The newest addition to the Rupay Prime Volleyball League
-            </p>
-            <span className='font-semibold'> #DilSeToofan | #DelhiToofans</span>
-            <div className="flex space-x-4 mt-3">
-              <a href=' https://www.facebook.com/profile.php?id=61555001505743' target='_blank' rel='noopener noreferrer' className="hover:text-[#3b0067]" aria-label="Facebook">
-                <FaFacebook />
-              </a>
-              <a href='https://x.com/DelhiToofans' target='_blank' rel='noopener noreferrer' className="hover:text-[#3b0067]" aria-label="Twitter">
-                <FaXTwitter />
-              </a>
-              <a href='https://www.instagram.com/delhitoofansofficial/' target='_blank' rel='noopener noreferrer' className="hover:text-[#3b0067]" aria-label="Instagram">
-                <FaInstagram />
-              </a>
-              <a href='https://www.youtube.com/@DelhiToofans' target='_blank' rel='noopener noreferrer' className='hover:text-[#3b0067]' aria-label='YouTube'>
-                <FaYoutube />
-              </a>
-            </div>
-          </div>
+        <div className="flex-1">
+          <h3 className="mb-4 text-lg font-bold">Connect with Us</h3>
+          <p className="mb-1 text-sm leading-relaxed">{ORGANISATION.tagline}</p>
+          <span className="font-semibold">{ORGANISATION.hashtags}</span>
+          <ul className="mt-3 flex space-x-4">
+            {SOCIAL_LINKS.map(({ label, href, Icon }) => (
+              <li key={label}>
+                <a
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-toofan-yellow"
+                  aria-label={label}
+                >
+                  <Icon />
+                </a>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
-    </section>
-  );
-};
+    </div>
+  </footer>
+);
 
 export default Footer;
