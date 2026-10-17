@@ -68,7 +68,7 @@ const SlideCopy = ({ slide }) => {
   if (slide.quote) {
     return (
       <figure className="hero-animate [text-shadow:0_2px_12px_rgba(0,0,0,0.45)]">
-        <blockquote className="text-xl font-semibold uppercase leading-snug text-white sm:text-2xl lg:text-4xl">
+        <blockquote className="text-xl font-semibold uppercase leading-snug text-white sm:text-2xl xl:text-4xl">
           “{slide.quote}”
         </blockquote>
         <figcaption className="mt-5 flex items-center justify-center gap-4 md:justify-start">
@@ -87,7 +87,7 @@ const SlideCopy = ({ slide }) => {
   return (
     <div className="hero-animate [text-shadow:0_2px_12px_rgba(0,0,0,0.45)]">
       <p className="text-xs font-bold uppercase tracking-[0.3em] text-toofan-yellow md:text-sm">{slide.eyebrow}</p>
-      <h2 className="mt-2 text-4xl font-extrabold uppercase leading-none text-white md:text-5xl lg:text-7xl">
+      <h2 className="mt-2 text-4xl font-extrabold uppercase leading-none text-white md:text-5xl xl:text-7xl">
         {slide.title}
       </h2>
       {slide.subtitle && (
